@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FurLife — Veterinary Development Control Center</title>
+  <meta name="description" content="Checklist maestro de desarrollo y control center para FurLife Veterinaria y Clínicas">
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐾</text></svg>">
+</head>
+<body>
+
+  <div class="app-container">
+
+    <!-- ====================================================================
+         MAIN HEADER
+         ==================================================================== -->
+    <header class="main-header">
+      <div class="header-top">
+        <div class="brand-section">
+          <div class="brand-logo-badge">FL</div>
+          <div class="brand-title-group">
+            <h1>FURLIFE <span>🐾</span></h1>
+            <div class="brand-subtitle">Veterinary Development Control Center</div>
+          </div>
+        </div>
+
+        <div class="header-actions">
+          <a href="index-mapa.html" class="header-btn btn-accent" style="text-decoration: none;" title="Abrir versión dedicada de Mapa Mental Interactivo con ramas desplegables">
+            <span>🌳</span> Ver Versión Mapa (index-mapa.html)
+          </a>
+          <button class="header-btn" id="btn-export-json" title="Descargar estado en archivo JSON">
+            <span>📥</span> Exportar JSON
+          </button>
+          <button class="header-btn" id="btn-import-json" title="Restaurar progreso desde un archivo JSON">
+            <span>📤</span> Importar JSON
+          </button>
+          <button class="header-btn" id="btn-export-csv" title="Exportar reporte detallado a formato Excel/CSV">
+            <span>📊</span> Exportar CSV
+          </button>
+          <button class="header-btn btn-danger-outline" id="btn-reset-progress" title="Reiniciar progreso a estado pendiente inicial">
+            <span>🔄</span> Reiniciar Progreso
+          </button>
+        </div>
+      </div>
+
+      <div class="last-update-indicator">
+        <span>⏱️</span> <span id="last-update-time">Cargando estado...</span>
+        <span style="margin: 0 8px; opacity: 0.5;">|</span>
+        <span>🛡️ Persistencia activa en LocalStorage</span>
+        <span style="margin: 0 8px; opacity: 0.5;">|</span>
+        <span>🚀 Versión 1.0 — Maestro de Ingeniería</span>
+      </div>
+    </header>
+
+    <!-- ====================================================================
+         OVERALL PROGRESS CARD
+         ==================================================================== -->
+    <section class="overall-progress-card">
+      <div class="overall-progress-header">
+        <div class="overall-progress-title">
+          <span>📊</span> Progreso General de Desarrollo de FurLife
+        </div>
+        <div class="overall-progress-percent" id="overall-percent-val">0%</div>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill-general" id="overall-progress-bar" style="width: 0%;"></div>
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         KPI DASHBOARD CARDS
+         ==================================================================== -->
+    <section class="kpi-grid">
+      <!-- Total Tasks -->
+      <div class="kpi-card card-total">
+        <div class="kpi-card-header">
+          <span class="kpi-title">Total Tareas</span>
+          <span class="kpi-icon">📋</span>
+        </div>
+        <div class="kpi-value" id="kpi-total-val">0</div>
+        <div class="kpi-subtext">Catálogo maestro de desarrollo</div>
+      </div>
+
+      <!-- Completed -->
+      <div class="kpi-card card-completed">
+        <div class="kpi-card-header">
+          <span class="kpi-title">Completadas</span>
+          <span class="kpi-icon">✅</span>
+        </div>
+        <div class="kpi-value" id="kpi-completed-val">0</div>
+        <div class="kpi-subtext">Verificadas y probadas</div>
+        <div class="kpi-progress-bar-bg">
+          <div class="kpi-progress-bar-fill" style="width: 0%;"></div>
+        </div>
+      </div>
+
+      <!-- Pending -->
+      <div class="kpi-card card-pending">
+        <div class="kpi-card-header">
+          <span class="kpi-title">Pendientes</span>
+          <span class="kpi-icon">⏳</span>
+        </div>
+        <div class="kpi-value" id="kpi-pending-val">0</div>
+        <div class="kpi-subtext">Por iniciar en backlog</div>
+      </div>
+
+      <!-- In Development -->
+      <div class="kpi-card card-dev">
+        <div class="kpi-card-header">
+          <span class="kpi-title">En desarrollo</span>
+          <span class="kpi-icon">🔵</span>
+        </div>
+        <div class="kpi-value" id="kpi-dev-val">0</div>
+        <div class="kpi-subtext">En construcción activa</div>
+      </div>
+
+      <!-- In QA -->
+      <div class="kpi-card card-qa">
+        <div class="kpi-card-header">
+          <span class="kpi-title">En pruebas</span>
+          <span class="kpi-icon">🟡</span>
+        </div>
+        <div class="kpi-value" id="kpi-qa-val">0</div>
+        <div class="kpi-subtext">Validación en Staging / QA</div>
+      </div>
+
+      <!-- Blocked -->
+      <div class="kpi-card card-blocked">
+        <div class="kpi-card-header">
+          <span class="kpi-title">Bloqueadas</span>
+          <span class="kpi-icon">🔴</span>
+        </div>
+        <div class="kpi-value" id="kpi-blocked-val">0</div>
+        <div class="kpi-subtext">Requiere desbloqueo</div>
+      </div>
+
+      <!-- MVP Readiness -->
+      <div class="kpi-card card-mvp">
+        <div class="kpi-card-header">
+          <span class="kpi-title">Progreso Fase 1 MVP</span>
+          <span class="kpi-icon">⚡</span>
+        </div>
+        <div class="kpi-value" id="kpi-mvp-val">0%</div>
+        <div class="kpi-subtext">Listo para lanzamiento clínico</div>
+        <div class="kpi-progress-bar-bg">
+          <div class="kpi-progress-bar-fill" style="width: 0%;"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         VIEW NAVIGATION TABS
+         ==================================================================== -->
+    <nav class="view-navigation-bar">
+      <button class="nav-tab-btn active" data-tab="modules">
+        <span>📋</span> Módulos del Sistema <span class="nav-badge">59</span>
+      </button>
+      <button class="nav-tab-btn" data-tab="processes">
+        <span>🔄</span> Procesos End-to-End <span class="nav-badge">37</span>
+      </button>
+      <button class="nav-tab-btn" data-tab="architecture">
+        <span>🏛️</span> Arquitectura & Backend <span class="nav-badge">21</span>
+      </button>
+      <button class="nav-tab-btn" data-tab="datamodels">
+        <span>🗄️</span> Modelo de Datos <span class="nav-badge">37</span>
+      </button>
+      <button class="nav-tab-btn" data-tab="roadmap">
+        <span>🗺️</span> Roadmap de Fases <span class="nav-badge">4 Fases</span>
+      </button>
+      <button class="nav-tab-btn" data-tab="mindmap">
+        <span>🌳</span> Mapa de Ramas Interactivo <span class="nav-badge">Mind Map</span>
+      </button>
+      <button class="nav-tab-btn" data-tab="luna">
+        <span>🤖</span> Luna & IA Clínica <span class="nav-badge">PetTech AI</span>
+      </button>
+    </nav>
+
+    <!-- ====================================================================
+         FILTER & SEARCH TOOLBAR
+         ==================================================================== -->
+    <section class="filter-toolbar">
+      <div class="filter-row-primary">
+        <!-- Search Input -->
+        <div class="search-box-wrapper">
+          <span class="search-icon-inside">🔍</span>
+          <input type="text" id="filter-search" class="search-input" placeholder="Buscar por título, descripción, módulo, ID o notas... (Presiona '/' para buscar)" />
+        </div>
+
+        <!-- Phase Filter -->
+        <select id="filter-phase" class="filter-select" title="Filtrar por fase del roadmap">
+          <option value="ALL">Todas las Fases</option>
+          <option value="FASE 1 — MVP">FASE 1 — MVP</option>
+          <option value="FASE 2 — OPERACIÓN AVANZADA">FASE 2 — OPERACIÓN AVANZADA</option>
+          <option value="FASE 3 — ECOSISTEMA">FASE 3 — ECOSISTEMA</option>
+          <option value="FASE 4 — INTELIGENCIA / IA">FASE 4 — INTELIGENCIA / IA</option>
+        </select>
+
+        <!-- Priority Filter -->
+        <select id="filter-priority" class="filter-select" title="Filtrar por prioridad">
+          <option value="ALL">Todas las Prioridades</option>
+          <option value="CRÍTICA">🔴 CRÍTICA</option>
+          <option value="ALTA">🟠 ALTA</option>
+          <option value="MEDIA">🟡 MEDIA</option>
+          <option value="BAJA">🟢 BAJA</option>
+        </select>
+
+        <!-- Status Filter -->
+        <select id="filter-status" class="filter-select" title="Filtrar por estado">
+          <option value="ALL">Todos los Estados</option>
+          <option value="Pendiente">☐ Pendiente</option>
+          <option value="En desarrollo">🔵 En desarrollo</option>
+          <option value="En pruebas">🟡 En pruebas</option>
+          <option value="Completado">🟢 Completado</option>
+          <option value="Bloqueado">🔴 Bloqueado</option>
+        </select>
+
+        <!-- Module Dropdown Filter -->
+        <select id="filter-module" class="filter-select" title="Filtrar por módulo">
+          <option value="ALL">Todos los Módulos (1-59)</option>
+        </select>
+      </div>
+
+      <div class="filter-chips-row">
+        <span class="filter-chips-label">Filtros rápidos:</span>
+        <button class="filter-chip" data-chip="pending">Solo pendientes</button>
+        <button class="filter-chip" data-chip="completed">Solo completadas</button>
+        <button class="filter-chip" data-chip="blocked">Solo bloqueadas</button>
+        <button class="filter-chip" data-chip="mvp_critica">Solo MVP Crítico</button>
+
+        <div class="toolbar-extra-actions">
+          <button class="action-link-btn" id="btn-expand-all">Expandir todos</button>
+          <span style="color: #CBD5E1;">•</span>
+          <button class="action-link-btn" id="btn-collapse-all">Colapsar todos</button>
+          <span style="color: #CBD5E1;">•</span>
+          <button class="action-link-btn" onclick="window.furLifeApp.clearAllFilters()">Limpiar filtros</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         VIEW 1: MÓDULOS DEL SISTEMA (59 Módulos)
+         ==================================================================== -->
+    <main id="view-modules">
+      <div class="modules-container" id="modules-list-container">
+        <!-- Rendered dynamically by js/app.js -->
+      </div>
+    </main>
+
+    <!-- ====================================================================
+         VIEW 2: PROCESOS END-TO-END (37 Procesos)
+         ==================================================================== -->
+    <section id="view-processes" style="display: none;">
+      <div class="processes-container" id="processes-container">
+        <!-- Rendered dynamically by js/app.js -->
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         VIEW 3: ARQUITECTURA & BACKEND (21 Áreas)
+         ==================================================================== -->
+    <section id="view-architecture" style="display: none;">
+      <div class="arch-grid-layout" id="arch-grid-container">
+        <!-- Rendered dynamically by js/app.js -->
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         VIEW 4: MODELO DE DATOS (37 Entidades)
+         ==================================================================== -->
+    <section id="view-datamodels" style="display: none;">
+      <div class="models-grid-layout" id="models-grid-container">
+        <!-- Rendered dynamically by js/app.js -->
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         VIEW 5: ROADMAP DE FASES
+         ==================================================================== -->
+    <section id="view-roadmap" style="display: none;">
+      <div class="roadmap-container" id="roadmap-container">
+        <!-- Rendered dynamically by js/app.js -->
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         VIEW: MAPA MENTAL INTERACTIVO / ÁRBOL DE RAMAS
+         ==================================================================== -->
+    <section id="view-mindmap" style="display: none;">
+      <div class="mindmap-section-wrapper">
+        <!-- Mindmap Toolbar Card -->
+        <div class="mindmap-toolbar-card">
+          <div class="mindmap-controls-left">
+            <span style="font-size: 13px; font-weight: 700; color: var(--fl-primary);">Agrupar ramas por:</span>
+            <div class="map-btn-group">
+              <button class="map-toggle-btn active" id="map-group-phase">⚡ Fases (Roadmap)</button>
+              <button class="map-toggle-btn" id="map-group-domain">🩺 Dominios Clínicos</button>
+            </div>
+            <label style="display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 600; color: var(--fl-text-main); cursor: pointer; margin-left: 8px;">
+              <input type="checkbox" id="map-filter-pending" />
+              <span>Solo pendientes</span>
+            </label>
+          </div>
+
+          <div class="mindmap-controls-right">
+            <input type="text" id="map-search-input" class="search-input" style="padding: 6px 10px; width: 180px; font-size: 12px;" placeholder="Filtrar en mapa..." />
+            
+            <div class="map-btn-group">
+              <button class="map-tool-btn" id="map-zoom-out" title="Alejar zoom">−</button>
+              <span id="map-zoom-label" style="font-size: 12px; font-weight: 700; padding: 6px 8px; background: #fff; min-width: 45px; text-align: center;">100%</span>
+              <button class="map-tool-btn" id="map-zoom-in" title="Acercar zoom">+</button>
+              <button class="map-tool-btn" id="map-zoom-reset" title="Restablecer zoom">↺</button>
+            </div>
+
+            <button class="map-tool-btn" id="map-expand-all" title="Desplegar todas las ramas">📂 Desplegar todo</button>
+            <button class="map-tool-btn" id="map-collapse-all" title="Colapsar ramas">📁 Colapsar</button>
+            <button class="map-tool-btn" id="map-fullscreen-btn" title="Pantalla completa">⛶ Pantalla Completa</button>
+          </div>
+        </div>
+
+        <!-- Viewport Canvas -->
+        <div class="mindmap-viewport" id="mindmap-viewport">
+          <div id="mindmap-canvas">
+            <!-- Dynamic Tree content rendered by js/mindmap.js -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         VIEW 6: LUNA & IA CLÍNICA
+         ==================================================================== -->
+    <section id="view-luna" style="display: none;">
+      <div class="luna-container">
+        <!-- Hero Banner -->
+        <div class="luna-hero-banner">
+          <div class="luna-hero-text">
+            <h2>🐾 Luna — Asistente Inteligente FurLife</h2>
+            <p>
+              Luna es el copiloto inteligente diseñado específicamente para agilizar la labor diaria del veterinario,
+              asistente y recepcionista. Para el MVP funciona con intenciones simuladas y navegación rápida, preparando la
+              plataforma para la integración progresiva de modelos clínicos avanzados.
+            </p>
+          </div>
+          <div class="luna-interactive-box">
+            <h4>Prueba rápida de intenciones MVP</h4>
+            <span class="luna-prompt-chip" onclick="window.furLifeApp.askLunaPrompt('¿Cómo creo una nueva cita?')">👉 ¿Cómo crear una cita?</span>
+            <span class="luna-prompt-chip" onclick="window.furLifeApp.askLunaPrompt('¿Dónde se registran los nuevos lotes?')">👉 Registrar nuevo lote de vacuna</span>
+            <span class="luna-prompt-chip" onclick="window.furLifeApp.askLunaPrompt('Resumen de pacientes atendidos hoy')">👉 Resumen de pacientes de hoy</span>
+          </div>
+        </div>
+
+        <div id="luna-chat-preview"></div>
+
+        <!-- Strict Clinical Safety Boundaries -->
+        <div class="safety-card">
+          <h3>⚠️ Límites Éticos y Legales de la IA Clínica (Guardrails Obligatorios)</h3>
+          <ul class="safety-list">
+            <li><strong>1. No emitir diagnósticos definitivos:</strong> Luna jamás emite diagnósticos médicos por su cuenta. Cualquier análisis es estrictamente una sugerencia de diagnóstico diferencial probabilístico.</li>
+            <li><strong>2. No sustituir el criterio profesional:</strong> La responsabilidad diagnóstica y terapéutica pertenece exclusivamente al médico veterinario colegiado con cédula profesional y firma válida.</li>
+            <li><strong>3. Advertencias claras y visibles:</strong> Toda sugerencia algorítmica viene acompañada de una advertencia de verificación humana obligatoria y referencias a literatura científica veterinaria.</li>
+            <li><strong>4. Registro auditable de uso de IA:</strong> Queda registrado en el expediente clínico si el médico utilizó, modificó o descartó la sugerencia de la IA.</li>
+            <li><strong>5. Anonimización y privacidad absoluta:</strong> Ningún dato de carácter personal de propietarios ni mascotas se envía a APIs de inferencia externas sin anonimización estricta previa.</li>
+          </ul>
+        </div>
+
+        <!-- 9-Step ML Pipeline -->
+        <div>
+          <h3 style="font-size: 18px; font-weight: 800; color: var(--fl-primary); margin-bottom: 12px;">
+            🔬 Pipeline de Machine Learning & MLOps Futuro (Fase 4)
+          </h3>
+          <div class="ml-pipeline-grid">
+            <div class="ml-pipeline-card">
+              <div class="ml-step-title">1. Curaduría y Desidentificación</div>
+              <div class="ml-step-desc">Eliminación de identificadores de tutores y pacientes, limpieza de datos nulos y normalización de rangos de laboratorio.</div>
+            </div>
+            <div class="ml-pipeline-card">
+              <div class="ml-step-title">2. Feature Engineering</div>
+              <div class="ml-step-desc">Extracción de variables agregadas y control estricto de filtración de futuro (Data Leakage) respetando timestamps.</div>
+            </div>
+            <div class="ml-pipeline-card">
+              <div class="ml-step-title">3. Entrenamiento y Validación</div>
+              <div class="ml-step-desc">Modelos supervisados de predicción de inasistencia (No-Show) y abandono de pacientes crónicos con validación cruzada temporal.</div>
+            </div>
+            <div class="ml-pipeline-card">
+              <div class="ml-step-title">4. Versionado con MLflow</div>
+              <div class="ml-step-desc">Registro centralizado de artefactos, pesos de modelos, parámetros y métricas ROC-AUC / F1 Score.</div>
+            </div>
+            <div class="ml-pipeline-card">
+              <div class="ml-step-title">5. API de Inferencia</div>
+              <div class="ml-step-desc">Microservicio de inferencia de baja latencia (< 150ms) con validación de esquemas de entrada fuertemente tipados.</div>
+            </div>
+            <div class="ml-pipeline-card">
+              <div class="ml-step-title">6. Explicabilidad (SHAP / LIME)</div>
+              <div class="ml-step-desc">Presentación transparente al veterinario de los factores y ponderaciones que determinaron la sugerencia del modelo.</div>
+            </div>
+            <div class="ml-pipeline-card">
+              <div class="ml-step-title">7. Detección de Data Drift</div>
+              <div class="ml-step-desc">Monitorización continua de divergencias estadísticas entre los datos de entrenamiento y las consultas clínicas reales.</div>
+            </div>
+            <div class="ml-pipeline-card">
+              <div class="ml-step-title">8. Human-in-the-Loop</div>
+              <div class="ml-step-desc">Supervisión y auditoría periódica por un comité médico veterinario antes de autorizar el despliegue de reentrenamientos.</div>
+            </div>
+            <div class="ml-pipeline-card">
+              <div class="ml-step-title">9. Despliegue Seguro (Canary)</div>
+              <div class="ml-step-desc">Liberación escalonada al 5% de clínicas con métricas de salud del modelo y rollback automático ante cualquier anomalía.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         MODALS
+         ==================================================================== -->
+    <!-- Task Notes Modal -->
+    <div class="modal-overlay" id="modal-notes">
+      <div class="modal-card-window">
+        <div class="modal-header">
+          <h3 id="modal-task-title">Notas de la Tarea</h3>
+          <button class="modal-close-btn" onclick="window.furLifeApp.closeModal('modal-notes')">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div id="modal-task-meta" style="font-size: 12.5px; color: var(--fl-text-muted);"></div>
+          <label style="font-size: 13px; font-weight: 700; color: var(--fl-primary);">Observaciones técnicas / Notas de desarrollo:</label>
+          <textarea id="task-notes-textarea" class="notes-textarea" placeholder="Escribe notas, dudas de implementación, nombres de ramas de Git, PRs o consideraciones técnicas..."></textarea>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-secondary" onclick="window.furLifeApp.closeModal('modal-notes')">Cancelar</button>
+          <button class="btn-primary" onclick="window.furLifeApp.saveTaskNotes()">Guardar Notas</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Reset Progress Modal -->
+    <div class="modal-overlay" id="modal-reset">
+      <div class="modal-card-window">
+        <div class="modal-header" style="background-color: #DC2626;">
+          <h3>⚠️ Confirmar Reinicio de Progreso</h3>
+          <button class="modal-close-btn" onclick="window.furLifeApp.closeModal('modal-reset')">&times;</button>
+        </div>
+        <div class="modal-body">
+          <p style="font-size: 14px; color: #334155; line-height: 1.5;">
+            ¿Estás completamente seguro de que deseas reiniciar el progreso de FurLife?
+          </p>
+          <p style="font-size: 13px; color: #DC2626; background: #FEF2F2; padding: 10px; border-radius: 6px; border-left: 4px solid #DC2626;">
+            Esta acción restablecerá todas las tareas completadas, en desarrollo y en pruebas al estado inicial <strong>☐ Pendiente</strong> y eliminará las notas personalizadas guardadas en este navegador.
+          </p>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-secondary" onclick="window.furLifeApp.closeModal('modal-reset')">Cancelar</button>
+          <button class="btn-danger" onclick="window.furLifeApp.confirmResetProgress()">Sí, Reiniciar Todo</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Import JSON Modal -->
+    <div class="modal-overlay" id="modal-import">
+      <div class="modal-card-window">
+        <div class="modal-header">
+          <h3>📥 Importar Checklist desde JSON</h3>
+          <button class="modal-close-btn" onclick="window.furLifeApp.closeModal('modal-import')">&times;</button>
+        </div>
+        <div class="modal-body">
+          <p style="font-size: 13px; color: var(--fl-text-muted);">
+            Puedes seleccionar un archivo <code>.json</code> exportado previamente o pegar el contenido JSON directamente a continuación:
+          </p>
+          <input type="file" accept=".json" onchange="window.furLifeApp.handleFileImport(event)" style="font-size: 13px; margin-bottom: 8px;" />
+          <textarea id="json-import-textarea" class="notes-textarea" placeholder="Pega aquí el contenido JSON del respaldo..."></textarea>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-secondary" onclick="window.furLifeApp.closeModal('modal-import')">Cancelar</button>
+          <button class="btn-primary" onclick="window.furLifeApp.executeImportJson()">Restaurar Progreso</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast Notifications Container -->
+    <div class="toast-container" id="toast-container"></div>
+
+  </div>
+
+  <!-- Scripts -->
+  <script src="js/data-modules.js"></script>
+  <script src="js/data-processes.js"></script>
+  <script src="js/data-architecture.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/mindmap.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FurLife — Mapa de Desarrollo (Mind Map Interactivo)</title>
+  <meta name="description" content="Versión Mapa Mental Interactivo con ramas desplegables y checkboxes funcionales para FurLife">
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌳</text></svg>">
+  <style>
+    /* Specific layout optimizations for index-mapa.html */
+    body {
+      background-color: #EBF7F7;
+    }
+    .mapa-header {
+      background: linear-gradient(135deg, var(--fl-primary) 0%, var(--fl-primary-dark) 100%);
+      color: var(--fl-white);
+      border-radius: var(--radius-lg);
+      padding: 18px 24px;
+      box-shadow: var(--shadow-md);
+      margin-bottom: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .mapa-header-left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .mapa-header-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .mapa-viewport-full {
+      background: #F4FBFC;
+      background-image: radial-gradient(#CBD5E1 1.2px, transparent 1.2px);
+      background-size: 24px 24px;
+      border: 1px solid var(--fl-border);
+      border-radius: var(--radius-lg);
+      min-height: calc(100vh - 240px);
+      height: calc(100vh - 240px);
+      overflow: auto;
+      position: relative;
+      padding: 30px 24px;
+      box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.04);
+    }
+    .kpi-mini-bar {
+      background: var(--fl-white);
+      border: 1px solid var(--fl-border-light);
+      border-radius: var(--radius-md);
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 14px;
+      box-shadow: var(--shadow-sm);
+    }
+    .kpi-mini-group {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .kpi-mini-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--fl-text-main);
+    }
+    .kpi-mini-badge {
+      padding: 2px 8px;
+      border-radius: var(--radius-full);
+      font-size: 12px;
+      font-weight: 800;
+    }
+    .kpi-badge-total { background: #E2E8F0; color: var(--fl-primary); }
+    .kpi-badge-done { background: #DCFCE7; color: #166534; }
+    .kpi-badge-pending { background: #F1F5F9; color: #475569; }
+    .kpi-badge-dev { background: #DBEAFE; color: #1E40AF; }
+    .kpi-badge-blocked { background: #FEE2E2; color: #991B1B; }
+  </style>
+</head>
+<body>
+
+  <div class="app-container" style="max-width: 100%; padding: 14px 20px;">
+
+    <!-- ====================================================================
+         HEADER: VERSIÓN MAPA MENTAL
+         ==================================================================== -->
+    <header class="mapa-header">
+      <div class="mapa-header-left">
+        <div class="brand-logo-badge" style="background-color: var(--fl-accent); color: var(--fl-primary-dark); font-size: 22px;">🌳</div>
+        <div class="brand-title-group">
+          <h1 style="font-size: 22px; font-weight: 800; display: flex; align-items: center; gap: 8px;">
+            FURLIFE — Mapa de Desarrollo
+          </h1>
+          <div class="brand-subtitle" style="font-size: 12px; color: var(--fl-bg-light); opacity: 0.9;">
+            Árbol de Ramas Interactivo con Despliegue Jerárquico y Checklists
+          </div>
+        </div>
+      </div>
+
+      <div class="mapa-header-right">
+        <!-- Switch to Tabular Checklist -->
+        <a href="index.html" class="header-btn btn-accent" style="text-decoration: none;" title="Cambiar a la vista de tabla / dashboard completo">
+          <span>📋</span> Ver Modo Checklist (index.html)
+        </a>
+        <button class="header-btn" id="btn-export-json" title="Descargar estado en archivo JSON">
+          <span>📥</span> Exportar JSON
+        </button>
+        <button class="header-btn" id="btn-import-json" title="Restaurar progreso desde un archivo JSON">
+          <span>📤</span> Importar JSON
+        </button>
+        <button class="header-btn btn-danger-outline" id="btn-reset-progress" title="Reiniciar progreso a pendiente">
+          <span>🔄</span> Reiniciar
+        </button>
+      </div>
+    </header>
+
+    <!-- ====================================================================
+         KPI MINI BAR SUMMARY
+         ==================================================================== -->
+    <section class="kpi-mini-bar">
+      <div class="kpi-mini-group">
+        <div class="kpi-mini-item">
+          <span>📊 Progreso General:</span>
+          <span class="kpi-mini-badge" id="overall-percent-val" style="background: var(--fl-accent); color: var(--fl-primary-dark); font-size: 14px;">0%</span>
+        </div>
+        <div style="width: 140px; height: 8px; background: #E2E8F0; border-radius: 99px; overflow: hidden;">
+          <div id="overall-progress-bar" style="height: 100%; width: 0%; background: linear-gradient(90deg, var(--fl-primary), var(--fl-accent));"></div>
+        </div>
+        <div class="kpi-mini-item">
+          <span>Total:</span>
+          <span class="kpi-mini-badge kpi-badge-total" id="kpi-total-val">0</span>
+        </div>
+        <div class="kpi-mini-item">
+          <span>✅ Completadas:</span>
+          <span class="kpi-mini-badge kpi-badge-done" id="kpi-completed-val">0</span>
+        </div>
+        <div class="kpi-mini-item">
+          <span>⏳ Pendientes:</span>
+          <span class="kpi-mini-badge kpi-badge-pending" id="kpi-pending-val">0</span>
+        </div>
+        <div class="kpi-mini-item">
+          <span>🔵 En dev:</span>
+          <span class="kpi-mini-badge kpi-badge-dev" id="kpi-dev-val">0</span>
+        </div>
+        <div class="kpi-mini-item">
+          <span>🔴 Bloqueadas:</span>
+          <span class="kpi-mini-badge kpi-badge-blocked" id="kpi-blocked-val">0</span>
+        </div>
+      </div>
+
+      <div style="font-size: 12px; color: var(--fl-text-muted);" id="last-update-time">
+        Cargando estado...
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         MINDMAP CONTROLS TOOLBAR
+         ==================================================================== -->
+    <section class="mindmap-toolbar-card" style="margin-bottom: 12px;">
+      <div class="mindmap-controls-left">
+        <span style="font-size: 13px; font-weight: 700; color: var(--fl-primary);">Agrupar ramas por:</span>
+        <div class="map-btn-group">
+          <button class="map-toggle-btn active" id="map-group-phase">⚡ Fases (Roadmap)</button>
+          <button class="map-toggle-btn" id="map-group-domain">🩺 Dominios Clínicos</button>
+        </div>
+
+        <label style="display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 600; color: var(--fl-text-main); cursor: pointer; margin-left: 8px;">
+          <input type="checkbox" id="map-filter-pending" />
+          <span>Solo tareas pendientes</span>
+        </label>
+      </div>
+
+      <div class="mindmap-controls-right">
+        <!-- Live Map Search -->
+        <input type="text" id="map-search-input" class="search-input" style="padding: 6px 12px; width: 220px; font-size: 12px;" placeholder="Buscar en ramas del mapa..." />
+        
+        <!-- Zoom Controls -->
+        <div class="map-btn-group">
+          <button class="map-tool-btn" id="map-zoom-out" title="Alejar zoom" style="font-size: 14px; font-weight: 800;">−</button>
+          <span id="map-zoom-label" style="font-size: 12px; font-weight: 700; padding: 6px 8px; background: #fff; min-width: 45px; text-align: center;">100%</span>
+          <button class="map-tool-btn" id="map-zoom-in" title="Acercar zoom" style="font-size: 14px; font-weight: 800;">+</button>
+          <button class="map-tool-btn" id="map-zoom-reset" title="Restablecer zoom a 100%">↺</button>
+        </div>
+
+        <!-- Expansion Controls -->
+        <button class="map-tool-btn" id="map-expand-all" title="Desplegar todas las ramas y módulos">
+          <span>📂</span> Desplegar todo
+        </button>
+        <button class="map-tool-btn" id="map-collapse-all" title="Colapsar a nivel principal">
+          <span>📁</span> Colapsar ramas
+        </button>
+        <button class="map-tool-btn" id="map-fullscreen-btn" title="Activar pantalla completa">
+          <span>⛶</span> Pantalla Completa
+        </button>
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         MINDMAP INTERACTIVE TREE VIEWPORT
+         ==================================================================== -->
+    <main class="mindmap-viewport-full" id="mindmap-viewport">
+      <div id="mindmap-canvas">
+        <!-- Rendered dynamically by js/mindmap.js -->
+      </div>
+    </main>
+
+    <!-- Hidden elements required for shared app.js logic -->
+    <div style="display: none;">
+      <div id="view-modules"></div>
+      <div id="view-processes"></div>
+      <div id="view-architecture"></div>
+      <div id="view-datamodels"></div>
+      <div id="view-roadmap"></div>
+      <div id="view-luna"></div>
+      <span id="kpi-qa-val">0</span>
+      <span id="kpi-mvp-val">0%</span>
+    </div>
+
+    <!-- ====================================================================
+         MODALS
+         ==================================================================== -->
+    <!-- Task Notes Modal -->
+    <div class="modal-overlay" id="modal-notes">
+      <div class="modal-card-window">
+        <div class="modal-header">
+          <h3 id="modal-task-title">Notas de la Tarea</h3>
+          <button class="modal-close-btn" onclick="window.furLifeApp.closeModal('modal-notes')">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div id="modal-task-meta" style="font-size: 12.5px; color: var(--fl-text-muted);"></div>
+          <label style="font-size: 13px; font-weight: 700; color: var(--fl-primary);">Observaciones técnicas / Notas de desarrollo:</label>
+          <textarea id="task-notes-textarea" class="notes-textarea" placeholder="Escribe notas, dudas de implementación, nombres de ramas de Git, PRs o consideraciones técnicas..."></textarea>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-secondary" onclick="window.furLifeApp.closeModal('modal-notes')">Cancelar</button>
+          <button class="btn-primary" onclick="window.furLifeApp.saveTaskNotes()">Guardar Notas</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Reset Progress Modal -->
+    <div class="modal-overlay" id="modal-reset">
+      <div class="modal-card-window">
+        <div class="modal-header" style="background-color: #DC2626;">
+          <h3>⚠️ Confirmar Reinicio de Progreso</h3>
+          <button class="modal-close-btn" onclick="window.furLifeApp.closeModal('modal-reset')">&times;</button>
+        </div>
+        <div class="modal-body">
+          <p style="font-size: 14px; color: #334155; line-height: 1.5;">
+            ¿Estás seguro de que deseas reiniciar todo el progreso de FurLife?
+          </p>
+          <p style="font-size: 13px; color: #DC2626; background: #FEF2F2; padding: 10px; border-radius: 6px; border-left: 4px solid #DC2626;">
+            Esta acción restablecerá todas las tareas al estado <strong>☐ Pendiente</strong> en este navegador.
+          </p>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-secondary" onclick="window.furLifeApp.closeModal('modal-reset')">Cancelar</button>
+          <button class="btn-danger" onclick="window.furLifeApp.confirmResetProgress()">Sí, Reiniciar Todo</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Import JSON Modal -->
+    <div class="modal-overlay" id="modal-import">
+      <div class="modal-card-window">
+        <div class="modal-header">
+          <h3>📥 Importar Checklist desde JSON</h3>
+          <button class="modal-close-btn" onclick="window.furLifeApp.closeModal('modal-import')">&times;</button>
+        </div>
+        <div class="modal-body">
+          <p style="font-size: 13px; color: var(--fl-text-muted);">
+            Selecciona un archivo <code>.json</code> exportado o pega el contenido JSON a continuación:
+          </p>
+          <input type="file" accept=".json" onchange="window.furLifeApp.handleFileImport(event)" style="font-size: 13px; margin-bottom: 8px;" />
+          <textarea id="json-import-textarea" class="notes-textarea" placeholder="Pega aquí el contenido JSON del respaldo..."></textarea>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-secondary" onclick="window.furLifeApp.closeModal('modal-import')">Cancelar</button>
+          <button class="btn-primary" onclick="window.furLifeApp.executeImportJson()">Restaurar Progreso</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast Notifications Container -->
+    <div class="toast-container" id="toast-container"></div>
+
+  </div>
+
+  <!-- Scripts -->
+  <script src="js/data-modules.js"></script>
+  <script src="js/data-processes.js"></script>
+  <script src="js/data-architecture.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/mindmap.js"></script>
+
+</body>
+</html>
